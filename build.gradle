@@ -1,0 +1,141 @@
+
+buildscript {
+  repositories {
+    maven { url "https://binrepo.target.com/artifactory/platform" }
+    maven { url "https://binrepo.target.com/artifactory/jcenter" }
+    maven { url "https://binrepo.target.com/artifactory/gradle" }
+    maven { url "https://binrepo.target.com/artifactory/maven-central" }
+    maven { url "https://binrepo.target.com/artifactory/gradle-cache" }
+  }
+  def targetPlatformConnectorVersion = "4.0.4"
+  def springBootVersion = "3.1.8"
+  dependencies {
+    classpath (group: "com.target.platform", name: "platform-connector-gradle", version: targetPlatformConnectorVersion) {
+      exclude group: "org.springframework.boot"
+    }
+    classpath group: "org.springframework.boot", name: "spring-boot-gradle-plugin", version: springBootVersion
+  }
+}
+plugins {
+  id 'java'
+  // Apply the application plugin to add support for building an application
+  id 'application'
+  // Apply jacoco code coverage plugin
+  id 'jacoco'
+  // Apply Sonarqube
+  id "org.sonarqube" version "4.4.1.3373"
+}
+
+apply plugin: 'com.target.platform.connector.spring-boot-webmvc'
+
+jacoco {
+  toolVersion = "0.8.10"
+}
+
+jacocoTestReport {
+  reports {
+    html.required = true
+    xml.required = true
+    csv.required = false
+  }
+}
+
+mainClassName = "com.target.kelsaapi.Main"
+jar.enabled = true
+def springBootVersion = "3.1.8"
+def lombokVersion = "1.18.30"
+def googleAdsVersion = "5.3.0"
+def log4jVersion = "2.22.1"
+
+dependencies {
+  implementation group: "org.springframework.boot", name: "spring-boot-starter-actuator", version: springBootVersion
+  implementation group: "org.springframework.boot", name: "spring-boot-starter-web", version: springBootVersion
+  implementation group: "org.springframework.boot", name: "spring-boot-starter-log4j2", version: springBootVersion
+  implementation group: "org.springframework.boot", name: "spring-boot-starter-tomcat", version: springBootVersion
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
+  //Needed to handle Postgresql array types through Hibernate/JPA/Spring: https://github.com/vladmihalcea/hypersistence-utils
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-62', version: '3.7.0'
+  //AOP needed for declarative spring-retry support: https://github.com/spring-projects/spring-retry#javaConfigForRetryProxies
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: springBootVersion
+  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.5'
+  implementation group: "org.javatuples", name: "javatuples", version: "1.2"
+  implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.16.1"
+  implementation group: "org.projectlombok", name: "lombok", version: lombokVersion
+  implementation group: "org.apache.httpcomponents.client5", name: "httpclient5", version: "5.2.3"
+  implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
+  implementation group: 'commons-io', name: 'commons-io', version: '2.15.1'
+  implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.25.0'
+  implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+  //Facebook: https://github.com/facebook/facebook-java-business-sdk
+  implementation group: 'com.facebook.business.sdk', name: 'facebook-java-business-sdk', version: "18.0.4"
+  //Google Ad Manager: https://developers.google.com/ad-manager/api/start
+  implementation group: 'com.google.api-ads', name: 'dfp-axis', version: googleAdsVersion
+  implementation group: 'com.google.api-ads', name: 'ads-lib', version: googleAdsVersion
+  //Google Campaign Manager 360: https://github.com/googleapis/google-api-java-client-services/tree/main/clients/google-api-services-dfareporting/v3.5
+  implementation group: 'com.google.apis', name: 'google-api-services-dfareporting', version: 'v4-rev20230918-2.0.0'
+  implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '1.22.0'
+  //AWS S3 used by Switchboard-provided files
+  implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.641'
+  annotationProcessor group: "org.projectlombok", name: "lombok", version: lombokVersion
+  annotationProcessor group: "org.springframework.boot",  name: "spring-boot-configuration-processor", version: springBootVersion
+  testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '5.15.0'
+  testImplementation group: "org.springframework.boot", name: "spring-boot-starter-test", version: springBootVersion
+  runtimeOnly group: 'org.postgresql', name: 'postgresql', version: '42.7.1'
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-integration
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-integration', version: '3.1.8'
+  // https://mvnrepository.com/artifact/org.springframework.integration/spring-integration-sftp
+//  implementation group: 'org.springframework.integration', name: 'spring-integration-sftp', version: '6.0.9'
+  // https://mvnrepository.com/artifact/com.springml/sftp.client
+  implementation group: 'com.springml', name: 'sftp.client', version: '1.0.3'
+
+}
+
+configurations.configureEach {
+  exclude group: 'ch.qos.logback'
+  exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+  exclude group: 'com.google.code.gson', module: 'facebook-java-business-sdk'
+  exclude group: 'com.google.inject', module: 'com.google.api-ads'
+  exclude group: 'com.google.inject.extensions', module: 'com.google.api-ads'
+  exclude group: 'com.google.guava', module: 'com.google.apis'
+  exclude module: 'commons-logging'
+  resolutionStrategy.eachDependency {
+    if (it.requested.group == 'org.springframework.boot') { it.useVersion springBootVersion }
+    if (it.requested.group == 'org.apache.logging.log4j') { it.useVersion log4jVersion }
+    //BOTH guava overrides for SCA/Mend finding CVE-2023-2976 - transient dependency of ads-lib-5.3.0.jar
+    if (it.requested.group == 'com.google.guava' && it.requested.name == 'guava' && it.requested.version == '32.0.0-android') {it.useVersion '32.1.3-android'}
+    if (it.requested.group == 'com.google.guava' && it.requested.name == 'guava' && it.requested.version == '32.0.0-jre') {it.useVersion '32.1.3-jre'}
+    //woodstox-core override for SCA/Mend findings WS-2018-0629 & CVE-2022-40152 - transient dependency of ads-lib-5.3.0.jar
+    if (it.requested.group == 'com.fasterxml.woodstox' & it.requested.name == 'woodstox-core') {it.useVersion '6.5.1'}
+    //jcommander override for SCA/Mend finding WS-2019-0490 - transient dependency of ads-lib-5.3.0.jar
+    if (it.requested.group == 'com.beust' && it.requested.name == 'jcommander') {it.useVersion '1.82'}
+    //ion-java override for SCA/Mend finding CVE-2024-21634 - transient dependency of aws-java-sdk-s3 version 1.12.587
+    if (it.requested.group == 'software.amazon.ion' && it.requested.name == 'ion-java') {it.useVersion '1.5.1'}
+    if (it.requested.group == 'com.amazon.ion' && it.requested.name == 'ion-java') {it.useVersion '1.10.5'}
+  }
+}
+
+sonarqube {
+  properties {
+    property "sonar.projectName", "mdf-api-kelsa-dip"
+    property "sonar.projectKey", "mdf-api-kelsa-dip"
+    property "sonar.projectVersion", "1"
+    property "sonar.sourceEncoding", "UTF-8"
+    property "sonar.language", "java"
+    property "sonar.verbose", "true"
+    property "sonar.sources", "src/main"
+    property "sonar.java.coveragePlugin", "jacoco"
+    property "sonar.java.source", "17"
+    property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+    property "sonar.junit.reportsPath", "build/test-results"
+    property "sonar.jacoco.reportPaths", "build/jacoco/test.exec"
+    property "sonar.binaries", "build/classes"
+    property "java.binaries", "build/classes"
+    property "sonar.tests", "src/test"
+    property "sonar.host.url", "https://desonar.prod.target.com/"
+    //Pass this in from Vela at runtime using ./gradlew clean build sonarqube -Dsonar.login=$SONAR_LOGIN --info --stacktrace
+    //property "sonar.login", project.property("sonarToken")
+    property "sonar.buildbreaker.skip","true"
+    property "sonar.forceAnalysis","true"
+    property "spring.profiles.active","test"
+  }
+}

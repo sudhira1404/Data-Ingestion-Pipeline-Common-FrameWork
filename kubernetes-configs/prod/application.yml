@@ -1,0 +1,278 @@
+server:
+  address: 127.0.0.1
+
+spring:
+  main.banner-mode: off
+  jpa:
+    open-in-view: true
+    hibernate.ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+          order_updates: true
+          batch_versioned_data: true
+          lob.non_contextual_creation: true
+        generate_statistics: false
+  datasource:
+    hikari:
+      connectionTimeout: 150000
+      maximumPoolSize: 10
+    initialization-mode: always
+    platform: postgres
+jdbcconfig:
+  url: "jdbc:postgresql://pgelx11512.hq.target.com:5432/mdfprd?currentSchema=prd&reWriteBatchedInserts=true&cachePrepStmts=true&useServerPrepStmts=true"
+  username: "mdfprd"
+  password: ""
+
+apiconfig :
+  appName: "Marketing Data Ingest Pipeline" #Application Name
+  blossomid: "CI02995445" #blossom id
+  teamname: "Data-Engineering-Marketing-Data-Foundation" #Name of the team
+  email: "DataSciences-DE-MDF-TM@target.com"
+  description: "Ingests data from external APIs to write to HDFS for Marketing Data Foundation"
+  authorizedGroup: "APP-OAUTH2-MDF-PRD"
+  source:
+    cleanupTempFile: true
+    facebook:
+      context:
+        accessToken: ""
+        appSecret: ""
+        debug: false
+      appId: ""
+      sleepIntervalMs: 300000 #5 Minute
+      maxSleepIntervals: 12 #12 retries ~ 1 hour total waiting
+    tradedesk:
+      baseUrl: "https://api.thetradedesk.com/v3/"
+      reportsEndPoint: "myreports/reportexecution/query/partners"
+      contractorEndPoint: "contract/query/partner/available"
+      advertiserEndPoint: "advertiser/query/partner"
+      adgroupAdvertiserEndPoint: "adgroup/query/advertiser"
+      partnerId: ""
+      authentication:
+        oauthUrl: "https://api.thetradedesk.com/v3/authentication"
+        responseTokenKeyName: "Token"
+        bodyMap:
+          Login: ""
+          Password: ""
+        headersMap:
+          Content-Type: "application/json"
+    snapchat:
+      baseUrl: "https://adsapi.snapchat.com"
+      version: "v1"
+      accountId: ""
+      authentication:
+        oauthUrl: "https://accounts.snapchat.com/login/oauth2/access_token"
+        bodyMap:
+          refresh_token: ""
+          client_id: ""
+          client_secret: ""
+          grant_type: "refresh_token"
+        headersMap:
+          Content-Type: "application/x-www-form-urlencoded"
+    pinterest:
+      baseUrl: "https://api.pinterest.com"
+      version: "v5"
+      baseEndpoint: "ad_accounts"
+      endpointSuffix: "reports"
+      authentication:
+        oauthUrl: "https://api.pinterest.com/v5/oauth/token"
+        responseTokenKeyName: "access_token"
+        bodyMap:
+          grant_type: "refresh_token"
+          refresh_token: ""
+          scope: "ads:read"
+        headersMap:
+          Content-Type: "application/x-www-form-urlencoded"
+          Authorization: ""
+    google:
+      marketingPlatform:
+        userName: "marketing-ingest-pipelines"
+        jsonKeyFilePath: "/tmp/client_secrets.json"
+      adManager:
+        clientId: ""
+        applicationName: "GAMJava"
+        networkCode: ""
+        jsonKeyFilePath: "/tmp/client_secrets.json"
+        delivery:
+          sample:
+            enabled: false
+            size: 5000
+          paginationSize: 1000
+        forecast:
+          contendingLineItemSize: 50
+          sample:
+            enabled: false
+            size: 1000
+          threadPool:
+            corePoolSize: 1
+            maxPoolSize: 50
+            queueSize: 100
+          queueingAsyncThreads:
+            retryBackoff:
+              initialIntervalSeconds: 5
+              maxRetryIntervalSeconds: 60
+              totalTimeToWaitMinutes: 30
+          asyncThreads:
+            retryBackoff:
+              initialIntervalSeconds: 5
+              maxRetryIntervalSeconds: 10
+              totalTimeToWaitMinutes: 10
+            requestTimeoutSeconds: 180
+
+    salesforce:
+      baseUrl: "https://roundel.my.salesforce.com"
+      baseEndpoint: "ad_accounts"
+      authentication:
+        oauthUrl: "https://login.salesforce.com/services/oauth2/token"
+        responseTokenKeyName: "access_token"
+        bodyMap:
+          grant_type: "password"
+          client_id: ""
+          client_secret: ""
+          username: ""
+          password: ""
+        headersMap:
+          Content-Type: "application/x-www-form-urlencoded"
+
+    xandr:
+      baseUrl: "https://api.appnexus.com/"
+      reportEndPoint: "report"
+      reportDownloadEndPoint: "report-download"
+      report:
+        format: "csv"
+        report_type:
+          curatoranalytics: "curator_analytics"
+          publisherperformance: "curator_analytics"
+          taseller: "seller_deal_metrics_report"
+        report_interval:
+          curatoranalytics: "last_14_days"
+          publisherperformance: "last_14_days"
+          taseller: "last_14_days"
+        columns:
+          curatoranalytics: ["day","curated_deal_id","curated_deal_name","member_currency","curator_margin","imps","viewed_imps","view_measurable_imps","curator_revenue","curator_tech_fees","curator_net_media_cost","clicks","video_errors","video_starts","video_skips","video_25_pcts","video_50_pcts","video_75_pcts","video_completions","content_duration_secs"]
+          publisherperformance: ["day","seller_member_id","seller_member_name","publisher_id","publisher_name","seller_deal_id","seller_deal_name","member_currency","curator_margin","imps","viewed_imps","view_measurable_imps","curator_revenue","curator_tech_fees","curator_net_media_cost","clicks","curator_total_cost","video_errors","video_starts","video_skips","video_25_pcts","video_50_pcts","video_75_pcts","video_completions"]
+          taseller: ["day","buyer_member_id","buyer_member_name","buyer_seat_id","buyer_seat_name","buyer_seat_code","deal_id","deal_name","ask_price","deal_alias","deal_type_name","end_date","package_id","start_date","imps_matched","imps_won","gross_win_rate","net_win_rate","bid_rate","seller_revenue","seller_revenue_ecpm","bid_requests","bids","final_bids","average_floor_price","reject_bidder_error_count","reject_count","reject_other_advertiser_exclusion_count","reject_other_count","reject_other_data_protection_count","reject_bidder_error_deal_not_available_count","reject_invalid_creative_count","reject_invalid_creative_not_ssl_count","reject_below_floor_count","reject_below_floor_ym_count",                "reject_blocked_by_ad_profile_adserver_count","reject_blocked_by_ad_profile_brand_count","reject_blocked_by_ad_profile_category_count","reject_blocked_by_ad_profile_count","reject_blocked_by_ad_profile_language_count","reject_blocked_by_ad_profile_member_count","reject_blocked_by_ad_profile_tech_attribute_count","reject_blocked_by_dynamic_adserver_count","reject_blocked_by_dynamic_brand_count","reject_blocked_by_dynamic_category_count","reject_blocked_by_dynamic_language_count","reject_blocked_by_dynamic_tech_attribute_count","reject_blocked_by_deal_adserver_count","reject_blocked_by_deal_brand_count","reject_blocked_by_deal_category_count","reject_blocked_by_deal_count","reject_blocked_by_deal_language_count","reject_blocked_by_deal_size_count","reject_blocked_by_deal_tech_attribute_count","reject_blocked_by_deal_payment_type_count","reject_blocked_by_deal_media_subtype_count","reject_blocked_by_deal_below_floor_count","reject_blocked_by_ad_profile_creative_count","reject_blocked_by_deal_creative_count","reject_blocked_by_ad_profile_audit_status_count","average_net_bid"]
+      authentication:
+        oauthUrl: "https://api.appnexus.com/auth"
+        responseTokenKeyName: "response/token"
+        bodyMap:
+          username: ""
+          password: ""
+        headersMap:
+          Content-Type: "application/json"
+    indexExchange:
+      baseUrl: "https://app.indexexchange.com/api/reporting/agg"
+      version: "v1"
+      reportEndPoint: "report-files"
+      reportListEndPoint: "list"
+      reportDownloadEndPoint: "download"
+      accountId: ""
+      authentication:
+        oauthUrl: "https://app.indexexchange.com/api/authentication/v1/login"
+        responseTokenKeyName: "loginResponse/authResponse/access_token"
+        bodyMap:
+          username: ""
+          password: ""
+        headersMap:
+          Content-Type: "application/json"
+
+    s3SwitchBoard:
+      bucketName: "switchboard-customer-target-us-west-2"
+      regionName: "us-east-2"
+      profileName: "default"
+      credentialsFileLocation: "/tmp/s3credentials"
+      maxLinesBeforeFlush: 10000
+      maxSizeBeforeNewFile: 1000000000
+
+    criteo:
+      hostName: ""
+      userName: ""
+      password: ""
+      privateKeyFile: "/tmp/criteo_private_key_file.pem"
+
+  hdfsdetails:
+    endPoint: https://xenon.bigred3.target.com/xenon/fs
+    format: "%s/xenon/fs/bigred3ns/%s"
+    userName: ""
+    password:
+  notification:
+    slack:
+      success:
+        environment: "prod"
+        channel: "#mdf-success-mgs"
+        webhookurl: ""
+        username: "MarketingDataFoundation"
+      failure:
+        environment: "prod"
+        channel: "#mdf-alert-msgs"
+        webhookurl: ""
+        username: "MarketingDataFoundation"
+  pipelineRunnerListener:
+    threadPool:
+      corePoolSize: 7
+      maxPoolSize: 14
+  secrets:
+    - fieldname: "source.facebook.context.accessToken"
+      tapkey: "apiconfig.source.facebook.context.accessToken"
+    - fieldname: "source.facebook.context.appSecret"
+      tapkey: "apiconfig.source.facebook.context.appSecret"
+    - fieldname: "source.facebook.appId"
+      tapkey: "apiconfig.source.facebook.appId"
+    - fieldname: "source.google.adManager.clientId"
+      tapkey: "apiconfig.source.google.adManager.clientId"
+    - fieldname: "source.google.adManager.networkCode"
+      tapkey: "apiconfig.source.google.adManager.networkCode"
+    - fieldname: "hdfsdetails.userName"
+      tapkey: "apiconfig.hdfsdetails.userName"
+    - fieldname: "hdfsdetails.password"
+      tapkey: "apiconfig.hdfsdetails.password"
+    - fieldname: "notification.slack.success.webhookurl"
+      tapkey: "apiconfig.notification.slack.success.webhookurl"
+    - fieldname: "notification.slack.failure.webhookurl"
+      tapkey: "apiconfig.notification.slack.failure.webhookurl"
+    - fieldname: "source.tradedesk.partnerId"
+      tapkey: "apiconfig.source.tradedesk.partnerId"
+    - fieldname: "source.tradedesk.authentication.bodyMap.Login"
+      tapkey: "apiconfig.source.tradedesk.authentication.bodyMap.Login"
+    - fieldname: "source.tradedesk.authentication.bodyMap.Password"
+      tapkey: "apiconfig.source.tradedesk.authentication.bodyMap.Password"
+    - fieldname: "source.snapchat.accountId"
+      tapkey: "apiconfig.source.snapchat.accountId"
+    - fieldname: "source.snapchat.authentication.bodyMap.refresh_token"
+      tapkey: "apiconfig.source.snapchat.authentication.bodyMap.refresh_token"
+    - fieldname: "source.snapchat.authentication.bodyMap.client_id"
+      tapkey: "apiconfig.source.snapchat.authentication.bodyMap.client_id"
+    - fieldname: "source.snapchat.authentication.bodyMap.client_secret"
+      tapkey: "apiconfig.source.snapchat.authentication.bodyMap.client_secret"
+    - fieldname: "source.pinterest.authentication.accessToken"
+      tapkey: "apiconfig.source.pinterest.authentication.accessToken"
+    - fieldname: "source.pinterest.authentication.bodyMap.refresh_token"
+      tapkey: "apiconfig.source.pinterest.authentication.bodyMap.refresh_token"
+    - fieldname: "source.pinterest.authentication.headersMap.Authorization"
+      tapkey: "apiconfig.source.pinterest.authentication.headersMap.Authorization"
+    - fieldname: "source.salesforce.authentication.bodyMap.client_id"
+      tapkey: "apiconfig.source.salesforce.authentication.bodyMap.client_id"
+    - fieldname: "source.salesforce.authentication.bodyMap.client_secret"
+      tapkey: "apiconfig.source.salesforce.authentication.bodyMap.client_secret"
+    - fieldname: "source.salesforce.authentication.bodyMap.username"
+      tapkey: "apiconfig.source.salesforce.authentication.bodyMap.username"
+    - fieldname: "source.salesforce.authentication.bodyMap.password"
+      tapkey: "apiconfig.source.salesforce.authentication.bodyMap.password"
+    - fieldname: "source.xandr.authentication.bodyMap.username"
+      tapkey: "apiconfig.source.xandr.authentication.bodyMap.username"
+    - fieldname: "source.xandr.authentication.bodyMap.password"
+      tapkey: "apiconfig.source.xandr.authentication.bodyMap.password"
+    - fieldname: "source.indexExchange.authentication.bodyMap.username"
+      tapkey: "apiconfig.source.xandr.authentication.bodyMap.username"
+    - fieldname: "source.indexExchange.authentication.bodyMap.password"
+      tapkey: "apiconfig.source.xandr.authentication.bodyMap.password"
+    - fieldname: "source.indexExchange.accountId"
+      tapkey: "apiconfig.source.indexExchange.accountId"
+    - fieldname: "source.criteo.hostName"
+      tapkey: "apiconfig.source.criteo.hostName"
+    - fieldname: "source.criteo.userName"
+      tapkey: "apiconfig.source.criteo.userName"
+    - fieldname: "source.criteo.password"
+      tapkey: "apiconfig.source.criteo.password"

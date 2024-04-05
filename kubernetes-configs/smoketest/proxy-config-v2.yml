@@ -1,0 +1,7 @@
+version: 2
+api_name: marketing_ingest_pipelines-v2
+handlers:
+  auth:
+    strategies:
+      id2:
+        - {}

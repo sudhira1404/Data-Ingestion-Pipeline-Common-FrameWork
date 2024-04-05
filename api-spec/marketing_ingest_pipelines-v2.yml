@@ -1,0 +1,289 @@
+swagger: '2.0'
+info:
+  description: 'Triggered by workflows running on BigRed3, this application would retrieve data from an external API and land the data to file on HDFS through Xenon. Limited to only members of the APP-OAUTH2-MDF-NPE (non-prod) and APP-OAUTH2-MDF-PRD AD (prod) groups.'
+  version: 2.0.0
+  title: marketing_ingest_pipelines-v2
+host: api-internal.target.com
+schemes:
+  - https
+basePath: /marketing_ingest_pipelines/v2
+produces:
+  - application/json
+consumes:
+  - application/json
+x-api-definition:
+  api_name: marketing_ingest_pipelines-v2
+  personnel:
+    owner: Chris.Mewes
+    portfolio: Data Engineering
+    development_team: Marketing Data Foundation
+    developers:
+      - Rhys.Jones
+      - Arun.Egga
+    enterprise_architect:
+      - Don.Sudduth
+  api_type: TENANT
+  lifecycle_status: PRODUCTION
+  production_date: "2021-09-14"
+  retirement_date: null
+  api_framework: SPRINGBOOT
+  overall_data_classification: INTERNAL
+  business_criticality: P3
+  service_now_ci: CI02995445
+  slack_channel_id: C88D88R4P
+  workload_placements:
+    - where: tap
+      platform: kubernetes
+      proxy_pattern: side-car
+  notification_ids:
+    - description: Slack mdf-alert-msgs-test
+      id: G01DNU82A72
+    - description: Slack mdf-alert-msgs
+      id: G01CWB6UKJ9
+    - description: Slack mdf-success-mgs
+      id: G01DBE438E5
+    - description: Slack mdf-success-msgs-test
+      id: G01D58922Q4
+  nuid_ad_groups:
+    - APP-OAUTH2-MDF-NPE
+    - APP-OAUTH2-MDF-PRD
+  risk_rating: MEDIUM
+  last_pentest_date: null
+  dependencies:
+    - system_name: Facebook Graph API
+      system_type: ORIGIN
+      api_spec: 'https://developers.facebook.com/docs/graph-api/overview'
+      code_repository: 'https://github.com/facebook/facebook-java-business-sdk'
+      issue_tracker: 'https://github.com/facebook/facebook-java-business-sdk/issues'
+      endpoints:
+        - name: Facebook Graph
+          url: 'https://graph.facebook.com/v9.0'
+    - system_name: Google Ad Manager API
+      system_type: ORIGIN
+      api_spec: 'https://developers.google.com/ad-manager/api/start'
+      code_repository: 'https://github.com/googleads/googleads-java-lib'
+      issue_tracker: 'https://github.com/googleads/googleads-java-lib/issues'
+      endpoints:
+        - name: Google Ad Manager
+          url: 'https://www.google.com/apis/ads/publisher/v202108'
+    - system_name: Google Campaign Manager 360 API
+      system_type: ORIGIN
+      api_spec: 'https://developers.google.com/doubleclick-advertisers/rest/v3.4'
+      code_repository: 'https://github.com/googleapis/google-api-java-client-services/tree/master/clients/google-api-services-dfareporting/v3.4'
+      issue_tracker: 'https://github.com/googleapis/google-api-java-client-services/issues'
+      endpoints:
+        - name: Google Campaign Manager Service Endpoint
+          url: 'https://dfareporting.googleapis.com/dfareporting/v3.4'
+    - system_name: Pinterest Marketing API
+      system_type: ORIGIN
+      api_spec: 'https://developers.pinterest.com/docs/redoc/#tag/reports'
+      endpoints:
+        - name: Pinterest Report Endpoint
+          url: 'https://api.pinterest.com/ads/v3/reports/async/{advertiser}/delivery_metrics/'
+    - system_name: Snapchat Marketing API
+      system_type: ORIGIN
+      api_spec: 'https://marketingapi.snapchat.com/docs/#overview'
+      endpoints:
+        - name: Snapchat Campaigns Endpoint
+          url: 'https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/campaigns'
+        - name: Snapchat Stats Endpoint
+          url: 'https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/stats'
+    - system_name: The Trade Desk API
+      system_type: ORIGIN
+      api_spec: 'https://api.thetradedesk.com/v3/portal/api/doc/ApiOverview'
+      endpoints:
+        - name: TTD Scheduled Report Endpoint
+          url: 'https://api.thetradedesk.com/v3/myreports/reportexecution/query/partners/{partner_id}/reports/{report_id}'
+  links:
+    issue_tracker: 'https://jira.target.com/secure/RapidBoard.jspa?rapidView=711&view=planning.nodetail&issueLimit=100'
+    api_wiki_page: 'https://git.target.com/data-engineering-mktg-data-foundation/mdf-api-kelsa-dip'
+    code_repository: 'https://git.target.com/data-engineering-mktg-data-foundation/mdf-api-kelsa-dip'
+    api_spec: 'https://git.target.com/data-engineering-mktg-data-foundation/mdf-api-kelsa-dip/tree/MDE-4145/api-spec/marketing_ingest_pipelines-v1.json'
+    ci_pipeline: 'https://vela.target.com/data-engineering-mktg-data-foundation/mdf-api-kelsa-dip'
+    documentation_links:
+      - 'https://git.target.com/data-engineering-mktg-data-foundation/mdf-api-kelsa-dip'
+    logging_link: ['https://visualize.target.com/']
+    metrics_link: ['https://visualize.target.com/']
+    monitoring_link: ['https://visualize.target.com/']
+    support_team_contact: DataSciences-DE-MDF-TM@Target.com
+  endpoints:
+    internal:
+      production: 'https://api-internal.target.com/marketing_ingest_pipelines/v2'
+      stage: 'https://stgapi-internal.target.com/marketing_ingest_pipelines/v2'
+      qa: null
+      ci: null
+  compliance_designations:
+    - None
+tags:
+  - name: pipeline-controller
+    description: Pipeline Controller
+securityDefinitions:
+  team_member_oauth:
+    type: oauth2
+    authorizationUrl: 'https://fedmobile.target.com/as/authorization.oauth2'
+    flow: implicit
+    scopes: {}
+paths:
+  /:
+    x-data_classification: INTERNAL
+    post:
+      x-incident_priority: P3
+      x-response_time_sla: 500ms
+      x-success_http_code: '200'
+      x-expected_tps: '100'
+      tags:
+        - pipeline-controller
+      description: 'Submits a request to run a pipeline to extract data from an external API and land to HDFS. The pipeline is run asynchronous to the caller, and so a successful response includes the pipeline_run_id, which may be used in subsequent GETs to find the status of the pipeline run.'
+      summary: Request Pipeline Run
+      operationId: requestReportBatchRunUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: pipeline_run_request
+          in: body
+          description: A JSON string comprising the fields as part of the Pipeline Run Request
+          required: true
+          schema:
+            $ref: '#/definitions/request_pipeline_run'
+        - name: x-api-key
+          in: header
+          description: 'Target''s API Key, passed as part of the header to record as the initiator of the pipeline run request.'
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: Valid Oauth2 header.
+          required: true
+          type: string
+          default: Bearer
+      responses:
+        '200':
+          description: Created
+          schema:
+            $ref: '#/definitions/pipeline_run_status_responses'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not Authorized
+        '500':
+          description: Internal Server Error
+  '/{pipeline_run_id}':
+    x-data_classification: INTERNAL
+    get:
+      x-incident_priority: P3
+      x-response_time_sla: 500ms
+      x-success_http_code: '200'
+      x-expected_tps: '100'
+      tags:
+        - pipeline-controller
+      summary: Pipeline Status
+      operationId: getPipelineStatusUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: pipeline_run_id
+          in: path
+          required: true
+          type: string
+          description: Unique UUID identifying a pipeline run.
+        - name: x-api-key
+          in: header
+          description: 'Target''s API Key, passed as part of the header to record as the initiator of the pipeline run request.'
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: Valid Oauth2 header.
+          required: true
+          type: string
+          default: Bearer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/pipeline_run_status'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+
+definitions:
+  pipeline_run_status_responses:
+    type: object
+    required:
+      - pipeline_run_status_responses
+    properties:
+      pipeline_run_status_responses:
+        type: array
+        items:
+          $ref: '#/definitions/pipeline_run_status'
+  request_pipeline_run:
+    type: object
+    required:
+      - source
+      - start_date
+      - end_date
+      - target_path
+      - report_type
+    properties:
+      source:
+        type: string
+        enum:
+          - facebook
+          - gam
+          - tradedesk
+          - snapchat
+          - campaign_manager_360
+          - search_ads_360
+          - pinterest
+        description: 'The name of the source system to extract from. Examples include ''facebook'', ''gam'', ''pinterest'', etc.'
+      start_date:
+        type: string
+        example: '2020-01-01'
+        description: The start date in yyyy-mm-dd format for extracting from the given source with.
+      end_date:
+        type: string
+        example: '2020-01-01'
+        description: The end date in yyyy-mm-dd format for extracting from the given source with.
+      target_path:
+        type: string
+        example: /user/NUA/foo/bar/
+        description: The full path in HDFS on BigRed3 to land the data once extracted.
+      report_type:
+        type: string
+        example: "actuals,delivery"
+        description: Supports a comma-delimited string of possible report types to request, based on the source system. For example, if the source was "gam" then allowed report_types would include "actuals" and/or "delivery". Go to https://git.target.com/data-engineering-mktg-data-foundation/mdf-api-kelsa-dip for a full list of supported report_types according to their sources.
+    title: request_pipeline_run
+  pipeline_run_status:
+    type: object
+    required:
+      - pipeline_run_id
+      - pipeline_run_status
+    properties:
+      pipeline_run_id:
+        $ref: '#/definitions/pipeline_run_id'
+      pipeline_run_status:
+        type: string
+        example: Initiated
+        enum:
+          - Initiated
+          - Running
+          - Completed
+          - Failed
+        description: The last known status of the pipeline run
+        title: pipeline_run_status
+      pipeline_run_request:
+        $ref: '#/definitions/request_pipeline_run'
+    title: pipeline_run_status
+  pipeline_run_id:
+    type: string
+    example: d2d19209-1cc0-442d-ac14-e07a9a60cf8e
+    description: Unique UUID identifying a pipeline run.
+    title: pipeline_run_id
+
